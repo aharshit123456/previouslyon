@@ -1,5 +1,5 @@
 
-import { getTrendingShows, getImageUrl } from '@/lib/tmdb';
+import { getTrendingShows, getImageUrl, getTVGenres } from '@/lib/tmdb';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -13,10 +13,18 @@ export default async function Home() {
     console.error("Failed to fetch trending shows", e);
   }
 
+  let genres = [];
+  try {
+    const genreData = await getTVGenres();
+    genres = genreData.genres || [];
+  } catch (e) {
+    console.error("Failed to fetch genres", e);
+  }
+
   return (
     <div className="pb-20">
       {/* Hero Section */}
-      <section className="relative h-[400px] w-full bg-gradient-to-t from-[#14181c] to-transparent">
+      <section className="relative h-[300px] md:h-[400px] w-full bg-gradient-to-t from-[#14181c] to-transparent">
         {trendingShows[0] && (
           <>
             <div className="absolute inset-0 z-0 opacity-40">
@@ -31,14 +39,30 @@ export default async function Home() {
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-[#14181c] via-[#14181c]/60 to-transparent" />
 
             <div className="container-custom relative z-20 h-full flex flex-col justify-end pb-10">
-              <h1 className="text-5xl font-bold text-white mb-2 drop-shadow-lg">{trendingShows[0].name}</h1>
-              <p className="max-w-xl text-gray-200 line-clamp-3 text-lg drop-shadow-md">{trendingShows[0].overview}</p>
-              <Link href={`/show/${trendingShows[0].id}`} className="mt-4 px-6 py-2 bg-primary text-white font-bold rounded w-fit hover:bg-primary-hover transition-colors">
+              <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg line-clamp-2">{trendingShows[0].name}</h1>
+              <p className="max-w-xl text-gray-200 line-clamp-3 text-sm md:text-lg drop-shadow-md">{trendingShows[0].overview}</p>
+              <Link href={`/show/${trendingShows[0].id}`} className="mt-4 px-6 py-2 bg-primary text-white font-bold rounded w-fit hover:bg-primary-hover transition-colors text-sm md:text-base">
                 View Show
               </Link>
             </div>
           </>
         )}
+      </section>
+
+      {/* Genres Section */}
+      <section className="container-custom mt-8">
+        <h2 className="text-sm font-bold text-[#99aabb] uppercase tracking-wider mb-4">Browse by Genre</h2>
+        <div className="flex flex-wrap gap-2">
+          {genres.map((genre: any) => (
+            <Link
+              key={genre.id}
+              href={`/search?q=${encodeURIComponent(genre.name)}`}
+              className="px-3 py-1 bg-[#1c2229] border border-[#445566] rounded-full text-xs text-pastel-petal hover:border-sky-blue hover:text-white transition-colors"
+            >
+              {genre.name}
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* Trending Section */}

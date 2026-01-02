@@ -32,9 +32,9 @@ export default function SignIn() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-[80vh]">
-            <div className="w-full max-w-md p-8 bg-[#1c2229] rounded border border-[#445566]">
-                <h1 className="text-2xl font-bold text-white mb-6 text-center">Sign In to PreviouslyOn</h1>
+        <div className="flex items-center justify-center min-h-[80vh] px-4">
+            <div className="w-full max-w-md p-6 md:p-8 bg-[#1c2229] rounded border border-[#445566]">
+                <h1 className="text-xl md:text-2xl font-bold text-white mb-6 text-center">Sign In to PreviouslyOn</h1>
 
                 {error && (
                     <div className="p-3 bg-red-900/50 border border-red-500 text-red-200 text-sm rounded mb-4">

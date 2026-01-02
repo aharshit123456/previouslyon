@@ -37,8 +37,8 @@ export default async function ListsIndexPage() {
     return (
         <div className="container-custom py-10">
             <div className="flex justify-between items-center mb-10 border-b border-[#445566] pb-4">
-                <h1 className="text-3xl font-bold text-white">Popular Lists</h1>
-                <Link href="/lists/new" className="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded flex items-center gap-2 transition-colors">
+                <h1 className="text-2xl md:text-3xl font-bold text-white">Popular Lists</h1>
+                <Link href="/lists/new" className="bg-primary hover:bg-primary-hover text-white font-bold py-2 px-4 rounded flex items-center gap-2 transition-colors text-sm md:text-base">
                     <Plus className="w-4 h-4" /> Create List
                 </Link>
             </div>

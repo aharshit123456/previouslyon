@@ -45,3 +45,19 @@ export const getImageUrl = (path: string | null, size: 'w500' | 'original' = 'w5
     if (!path) return '';
     return `https://image.tmdb.org/t/p/${size}${path}`;
 };
+
+export async function getTVGenres() {
+    return tmdbFetch('/genre/tv/list');
+}
+
+export const discoverTV = async (params: Record<string, string> = {}) => {
+    const defaultParams = {
+        include_adult: 'false',
+        include_null_first_air_dates: 'false',
+        language: 'en-US',
+        page: '1',
+        sort_by: 'popularity.desc',
+        ...params
+    };
+    return tmdbFetch('/discover/tv', defaultParams);
+};

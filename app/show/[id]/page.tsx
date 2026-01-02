@@ -89,7 +89,7 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
             <div className="container-custom mt-8 grid grid-cols-1 md:grid-cols-[250px_1fr] gap-10">
                 {/* Sidebar (Mobile Poster + Stats) */}
-                <div className="hidden md:block">
+                <div className="block">
                     <div className="bg-[#1c2229] p-4 rounded border border-[#445566]">
                         <div className="text-xs font-bold text-[#99aabb] uppercase tracking-wider mb-3">Rate</div>
                         <div className="flex justify-between text-2xl text-[#445566]">
