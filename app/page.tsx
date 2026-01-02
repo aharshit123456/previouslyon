@@ -2,6 +2,9 @@
 import { getTrendingShows, getImageUrl, getTVGenres } from '@/lib/tmdb';
 import Link from 'next/link';
 import Image from 'next/image';
+import RecommendedShows from '@/components/recommended-shows';
+import { supabase } from '@/lib/supabase';
+import { getRecommendations } from '@/lib/tmdb';
 
 // We fetch directly in the server component for the initial render
 export default async function Home() {
@@ -19,6 +22,49 @@ export default async function Home() {
     genres = genreData.genres || [];
   } catch (e) {
     console.error("Failed to fetch genres", e);
+  }
+
+  // --- Personalization Algo ---
+  let recommendedShows: any[] = [];
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (session?.user) {
+    // 1. Get all shows in user's lists
+    const { data: userListItems } = await supabase
+      .from('list_items')
+      .select('show_id, lists!inner(user_id)')
+      .eq('lists.user_id', session.user.id);
+
+    const userShowIds = userListItems?.map((item: any) => item.show_id) || [];
+
+    // 2. Condition: > 2 shows
+    if (userShowIds.length > 2) {
+      // 3. Pick up to 3 random shows to base recommendations on
+      const shuffled = userShowIds.sort(() => 0.5 - Math.random());
+      const sourceIds = shuffled.slice(0, 3);
+
+      try {
+        const promises = sourceIds.map((id: number) => getRecommendations(id));
+        const results = await Promise.all(promises);
+
+        // 4. Aggregate & Deduplicate
+        const allRecs = results.flatMap((r: any) => r.results || []);
+        const uniqueRecs = new Map();
+
+        allRecs.forEach((show: any) => {
+          // Filter out shows user already has
+          if (!userShowIds.includes(show.id)) {
+            uniqueRecs.set(show.id, show);
+          }
+        });
+
+        recommendedShows = Array.from(uniqueRecs.values())
+          .sort(() => 0.5 - Math.random()) // Shuffle results
+          .slice(0, 10); // Take 10
+      } catch (e) {
+        console.error("Personalization Error:", e);
+      }
+    }
   }
 
   return (
@@ -64,6 +110,9 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      {/* Recommended for You (Personalized - Client Side) */}
+      <RecommendedShows />
 
       {/* Trending Section */}
       <section className="container-custom mt-10">

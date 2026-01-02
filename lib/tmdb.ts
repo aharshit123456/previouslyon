@@ -50,6 +50,10 @@ export async function getTVGenres() {
     return tmdbFetch('/genre/tv/list');
 }
 
+export const getRecommendations = async (id: string | number) => {
+    return tmdbFetch(`/tv/${id}/recommendations`);
+};
+
 export const discoverTV = async (params: Record<string, string> = {}) => {
     const defaultParams = {
         include_adult: 'false',
