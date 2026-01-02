@@ -43,7 +43,15 @@ export default function Navbar() {
                     )}
 
                     <div className="text-pastel-petal border-l border-[#445566] pl-4 ml-2">
-                        <Search className="w-5 h-5 cursor-pointer hover:text-sky-blue transition-colors" />
+                        <form action="/search" className="relative group">
+                            <Search className="w-5 h-5 absolute left-0 top-1/2 -translate-y-1/2 text-[#99aabb] group-focus-within:text-sky-blue transition-colors pointer-events-none" />
+                            <input
+                                type="text"
+                                name="q"
+                                placeholder="Search..."
+                                className="bg-transparent border-none outline-none pl-8 w-24 focus:w-48 transition-all text-white placeholder-gray-500 text-sm"
+                            />
+                        </form>
                     </div>
                 </nav>
             </div>

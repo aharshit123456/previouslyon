@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function ListsIndexPage() {
 
     // Fetch Public Lists
-    const { data: lists } = await supabase
+    const { data: lists, error } = await supabase
         .from('lists')
         .select(`
         id,
@@ -27,6 +27,12 @@ export default async function ListsIndexPage() {
         .eq('is_public', true)
         .order('created_at', { ascending: false })
         .limit(20);
+
+    console.log("Lists Fetch Result:", { count: lists?.length, error });
+
+    if (error) {
+        console.error("Supabase Error (Lists):", error);
+    }
 
     return (
         <div className="container-custom py-10">

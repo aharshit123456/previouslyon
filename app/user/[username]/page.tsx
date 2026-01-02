@@ -48,6 +48,13 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
         .order('watched_at', { ascending: false })
         .limit(20);
 
+    // 4. Fetch User Lists
+    const { data: userLists } = await supabase
+        .from('lists')
+        .select('id, name, description, is_public, list_items(count)')
+        .eq('user_id', profile.id)
+        .order('created_at', { ascending: false });
+
     return (
         <div className="container-custom py-10">
             {/* Profile Header */}
@@ -73,7 +80,7 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                             <div className="text-xs uppercase tracking-wider text-[#99aabb]">Reviews</div>
                         </div>
                         <div className="text-center">
-                            <div className="text-2xl font-bold text-white">0</div>
+                            <div className="text-2xl font-bold text-white">{userLists?.length || 0}</div>
                             <div className="text-xs uppercase tracking-wider text-[#99aabb]">Lists</div>
                         </div>
                     </div>
@@ -120,10 +127,26 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-bold text-[#99aabb] uppercase tracking-wider mb-4 border-b border-[#445566] pb-2">Favorite Genres</h3>
-                    <div className="bg-[#1c2229] p-4 rounded border border-[#445566] text-center text-[#99aabb] italic text-sm">
-                        Coming soon...
-                    </div>
+                    <h3 className="text-sm font-bold text-[#99aabb] uppercase tracking-wider mb-4 border-b border-[#445566] pb-2">User Lists</h3>
+
+                    {userLists && userLists.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-4">
+                            {userLists.map((list: any) => (
+                                <Link key={list.id} href={`/lists/${list.id}`} className="block p-4 bg-[#1c2229] border border-[#445566] rounded hover:border-sky-blue transition-colors">
+                                    <h4 className="font-bold text-white mb-1">{list.name}</h4>
+                                    {list.description && <p className="text-sm text-[#99aabb] line-clamp-2 mb-2">{list.description}</p>}
+                                    <div className="flex items-center justify-between text-xs text-[#667788]">
+                                        <span>{list.list_items?.[0]?.count || 0} items</span>
+                                        {!list.is_public && <span className="bg-red-500/20 text-red-400 px-2 py-0.5 rounded">Private</span>}
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="bg-[#1c2229] p-4 rounded border border-[#445566] text-center text-[#99aabb] italic text-sm">
+                            No lists created yet.
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

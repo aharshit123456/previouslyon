@@ -50,16 +50,26 @@ export default function AddToListModal({ show, isOpen, onClose }: AddToListModal
             await supabase.from('list_items').delete().eq('list_id', listId).eq('show_id', show.id);
         } else {
             // Add - First ensure show exists in DB (Show Cache Upsert)
-            await supabase
+            // Add - First ensure show exists in DB (Show Cache Upsert)
+            // Use ignoreDuplicates to avoid RLS Update permission issues if we don't own the row
+            const { error: showErr } = await supabase
                 .from('shows')
                 .upsert({
                     id: show.id,
                     name: show.name,
                     poster_path: show.poster_path,
                     first_air_date: show.first_air_date
-                }, { onConflict: 'id' });
+                }, { onConflict: 'id', ignoreDuplicates: true });
 
-            await supabase.from('list_items').insert([{ list_id: listId, show_id: show.id }]);
+            if (showErr) console.error("Shows Upsert Error:", showErr);
+
+            const { error: listErr } = await supabase.from('list_items').insert([{ list_id: listId, show_id: show.id }]);
+            if (listErr) {
+                console.error("List Item Insert Error:", listErr);
+                alert("Failed to add to list");
+                setActionLoading(null);
+                return;
+            }
         }
 
         // Update Local State

@@ -27,7 +27,8 @@ export default async function ListDetailsPage({ params }: { params: Promise<{ id
     }
 
     // Fetch List Items + Show Details
-    const { data: items } = await supabase
+    // Fetch List Items + Show Details
+    const { data: items, error: itemsError } = await supabase
         .from('list_items')
         .select(`
         *,
@@ -39,8 +40,9 @@ export default async function ListDetailsPage({ params }: { params: Promise<{ id
             vote_average
         )
     `)
-        .eq('list_id', id)
-        .order('added_at', { ascending: true }); // Custom order usually, but date for now
+        .eq('list_id', id);
+
+    console.log(`[ListDetail] Items fetch result for list ${id}:`, { count: items?.length, error: itemsError });
 
     return (
         <div className="container-custom py-10">
