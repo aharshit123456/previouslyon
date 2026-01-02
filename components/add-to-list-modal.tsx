@@ -44,37 +44,45 @@ export default function AddToListModal({ show, isOpen, onClose }: AddToListModal
 
     const toggleList = async (listId: number, hasShow: boolean) => {
         setActionLoading(listId);
+        console.log(`[AddToList] Toggling show ${show.id} in list ${listId}. Currently in list: ${hasShow}`);
 
-        if (hasShow) {
-            // Remove
-            await supabase.from('list_items').delete().eq('list_id', listId).eq('show_id', show.id);
-        } else {
-            // Add - First ensure show exists in DB (Show Cache Upsert)
-            // Add - First ensure show exists in DB (Show Cache Upsert)
-            // Use ignoreDuplicates to avoid RLS Update permission issues if we don't own the row
-            const { error: showErr } = await supabase
-                .from('shows')
-                .upsert({
-                    id: show.id,
-                    name: show.name,
-                    poster_path: show.poster_path,
-                    first_air_date: show.first_air_date
-                }, { onConflict: 'id', ignoreDuplicates: true });
+        try {
+            if (hasShow) {
+                // Remove
+                const { error } = await supabase.from('list_items').delete().eq('list_id', listId).eq('show_id', show.id);
+                if (error) throw error;
+            } else {
+                // Add - First ensure show exists in DB (Show Cache Upsert)
+                console.log("[AddToList] Upserting show...");
+                const { error: showErr } = await supabase
+                    .from('shows')
+                    .upsert({
+                        id: show.id,
+                        name: show.name,
+                        poster_path: show.poster_path,
+                        first_air_date: show.first_air_date
+                    }, { onConflict: 'id', ignoreDuplicates: true });
 
-            if (showErr) console.error("Shows Upsert Error:", showErr);
+                if (showErr) {
+                    console.error("[AddToList] Show Upsert Error:", showErr);
+                    // We continue anyway, hoping the show exists. 
+                }
 
-            const { error: listErr } = await supabase.from('list_items').insert([{ list_id: listId, show_id: show.id }]);
-            if (listErr) {
-                console.error("List Item Insert Error:", listErr);
-                alert("Failed to add to list");
-                setActionLoading(null);
-                return;
+                console.log("[AddToList] Inserting list item...");
+                const { error: listErr } = await supabase.from('list_items').insert([{ list_id: listId, show_id: show.id }]);
+                if (listErr) throw listErr;
             }
-        }
 
-        // Update Local State
-        setLists(prev => prev.map(l => l.id === listId ? { ...l, hasShow: !hasShow } : l));
-        setActionLoading(null);
+            // Update Local State
+            setLists(prev => prev.map(l => l.id === listId ? { ...l, hasShow: !hasShow } : l));
+            console.log("[AddToList] Success!");
+
+        } catch (err) {
+            console.error("[AddToList] Error:", err);
+            alert("Failed to update list. See console for details.");
+        } finally {
+            setActionLoading(null);
+        }
     };
 
     if (!isOpen) return null;

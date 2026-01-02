@@ -40,12 +40,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(session?.user ?? null);
 
             if (session?.user) {
-                const { data } = await supabase
+                console.log("[AuthProvider] Fetching profile for user:", session.user.id);
+                const { data, error } = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', session.user.id)
                     .single();
-                setProfile(data);
+
+                if (error) {
+                    console.error("[AuthProvider] Error fetching profile:", error);
+                } else {
+                    console.log("[AuthProvider] Profile loaded:", data);
+                    setProfile(data);
+                }
             } else {
                 setProfile(null);
             }
