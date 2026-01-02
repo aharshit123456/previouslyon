@@ -35,32 +35,65 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
 
     useEffect(() => {
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-            setSession(session);
-            setUser(session?.user ?? null);
+        const initializeAuth = async () => {
+            // Check for existing session first
+            const { data: { session: initialSession } } = await supabase.auth.getSession();
+            if (initialSession) {
+                setSession(initialSession);
+                setUser(initialSession.user);
+                await fetchProfile(initialSession.user.id);
+            }
+            setLoading(false);
 
-            if (session?.user) {
-                console.log("[AuthProvider] Fetching profile for user:", session.user.id);
+            // Listen for changes
+            const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+                console.log(`[AuthProvider] Auth Event: ${event}`);
+                setSession(currentSession);
+                setUser(currentSession?.user ?? null);
+
+                if (currentSession?.user && event !== 'INITIAL_SESSION') {
+                    // We only need to fetch if it's a new sign in or explicit change
+                    // avoiding double fetch if initialSession already covered it.
+                    // But for safety, we often just fetch if we don't have a profile yet or user changed.
+                    await fetchProfile(currentSession.user.id);
+                } else if (!currentSession) {
+                    setProfile(null);
+                }
+
+                setLoading(false);
+            });
+
+            return subscription;
+        };
+
+        const fetchProfile = async (userId: string) => {
+            console.log("[AuthProvider] Fetching profile for:", userId);
+            try {
                 const { data, error } = await supabase
                     .from('profiles')
                     .select('*')
-                    .eq('id', session.user.id)
-                    .single();
+                    .eq('id', userId)
+                    .maybeSingle();
 
                 if (error) {
                     console.error("[AuthProvider] Error fetching profile:", error);
-                } else {
-                    console.log("[AuthProvider] Profile loaded:", data);
+                } else if (data) {
+                    console.log("[AuthProvider] Profile loaded.");
                     setProfile(data);
+                } else {
+                    console.warn("[AuthProvider] Profile missing for user.");
+                    setProfile(null);
                 }
-            } else {
-                setProfile(null);
+            } catch (err) {
+                console.error("[AuthProvider] Profile fetch exception:", err);
             }
+        };
 
-            setLoading(false);
-        });
+        const subPromise = initializeAuth();
 
-        return () => subscription.unsubscribe();
+        return () => {
+            subPromise.then(sub => sub?.unsubscribe());
+        };
     }, []);
 
     const signOut = async () => {
