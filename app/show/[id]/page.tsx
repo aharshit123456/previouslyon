@@ -1,7 +1,8 @@
 
-import { getShowDetails, getImageUrl } from '@/lib/tmdb';
+import { getShowDetails, getImageUrl, getShowVideos } from '@/lib/tmdb';
 import Link from 'next/link';
 import ShowActions from '@/components/show-actions';
+import VideoBackground from '@/components/video-background';
 import Image from 'next/image';
 import { Calendar, Star, Clock } from 'lucide-react';
 import type { Metadata } from 'next';
@@ -37,8 +38,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 export default async function ShowPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
     let show = null;
+    let videos = [];
     try {
-        show = await getShowDetails(id);
+        const [showData, videosData] = await Promise.all([
+            getShowDetails(id),
+            getShowVideos(id)
+        ]);
+        show = showData;
+        videos = videosData.results || [];
     } catch (error) {
         return <div className="p-10 text-center text-red-500">Error loading show details.</div>;
     }
@@ -73,18 +80,16 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
             />
             {/* Backdrop Header */}
-            <div className="relative h-[50vh] w-full">
-                <Image
-                    src={getImageUrl(show.backdrop_path, 'original')}
-                    alt={show.name}
-                    fill
-                    className="object-cover opacity-30"
-                    priority
+            <div className="relative h-[50vh] w-full overflow-hidden bg-black">
+                <VideoBackground
+                    videos={videos}
+                    fallbackImage={getImageUrl(show.backdrop_path, 'original')}
+                    fallbackAlt={show.name}
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#14181c] via-transparent to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-b from-[#14181c]/50 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#14181c] via-transparent to-transparent z-20" />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#14181c]/50 to-transparent z-20" />
 
-                <div className="container-custom relative h-full flex flex-col justify-end pb-8">
+                <div className="container-custom relative h-full flex flex-col justify-end pb-8 z-30">
                     <div className="flex gap-8 items-end">
                         {/* Poster */}
                         <div className="relative w-40 shrink-0 aspect-[2/3] rounded overflow-hidden shadow-2xl border border-[#445566] hidden md:block">

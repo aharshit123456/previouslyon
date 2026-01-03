@@ -40,6 +40,10 @@ export const getSeasonDetails = async (id: string | number, seasonNumber: number
     return tmdbFetch(`/tv/${id}/season/${seasonNumber}`);
 };
 
+export const getShowVideos = async (id: string | number) => {
+    return tmdbFetch(`/tv/${id}/videos`);
+};
+
 // Image Helper
 export const getImageUrl = (path: string | null, size: 'w500' | 'original' = 'w500') => {
     if (!path) return '';
