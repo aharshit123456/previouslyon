@@ -1,17 +1,19 @@
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase-server';
 import { getImageUrl } from '@/lib/tmdb';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { User } from 'lucide-react';
 import type { Metadata } from 'next';
+import DeleteListButton from '@/components/delete-list-button';
 
 // Force dynamic since we fetch data that might change
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
     const { id } = await params;
+    const supabase = await createClient();
     const { data: list } = await supabase
         .from('lists')
         .select('name, description')
@@ -32,13 +34,18 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function ListDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
+    const supabase = await createClient();
 
-    // Fetch List + Owner Profile
+    // 1. Fetch Session for Ownership Check
+    const { data: { session } } = await supabase.auth.getSession();
+    console.log('[ListDetails] Session User:', session?.user?.id);
+
+    // 2. Fetch List + Owner Profile
     const { data: list, error } = await supabase
         .from('lists')
         .select(`
         *,
-        profiles:user_id (username, avatar_url)
+        profiles:user_id (id, username, avatar_url)
     `)
         .eq('id', id)
         .single();
@@ -47,8 +54,9 @@ export default async function ListDetailsPage({ params }: { params: Promise<{ id
         return notFound();
     }
 
-    // Fetch List Items + Show Details
-    // Fetch List Items + Show Details
+    const isOwner = session?.user?.id === list.profiles.id;
+
+    // 3. Fetch List Items + Show Details
     const { data: items, error: itemsError } = await supabase
         .from('list_items')
         .select(`
@@ -62,8 +70,6 @@ export default async function ListDetailsPage({ params }: { params: Promise<{ id
         )
     `)
         .eq('list_id', id);
-
-    console.log(`[ListDetail] Items fetch result for list ${id}:`, { count: items?.length, error: itemsError });
 
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -95,16 +101,22 @@ export default async function ListDetailsPage({ params }: { params: Promise<{ id
                 <h1 className="text-4xl font-bold text-white mb-4">{list.name}</h1>
                 <p className="text-[#99aabb] max-w-2xl mx-auto mb-6">{list.description}</p>
 
-                <Link href={`/user/${list.profiles.username}`} className="inline-flex items-center gap-2 text-sm text-sky-blue hover:text-baby-pink transition-colors">
-                    <div className="relative w-6 h-6 rounded-full overflow-hidden bg-[#2c3440]">
-                        {list.profiles.avatar_url ? (
-                            <Image src={list.profiles.avatar_url} alt={list.profiles.username} fill className="object-cover" />
-                        ) : (
-                            <User className="w-4 h-4 absolute top-1 left-1 text-[#99aabb]" />
-                        )}
-                    </div>
-                    Created by <span className="font-bold">{list.profiles.username}</span>
-                </Link>
+                <div className="flex items-center justify-center gap-4">
+                    <Link href={`/user/${list.profiles.username}`} className="inline-flex items-center gap-2 text-sm text-sky-blue hover:text-baby-pink transition-colors">
+                        <div className="relative w-6 h-6 rounded-full overflow-hidden bg-[#2c3440]">
+                            {list.profiles.avatar_url ? (
+                                <Image src={list.profiles.avatar_url} alt={list.profiles.username} fill className="object-cover" />
+                            ) : (
+                                <User className="w-4 h-4 absolute top-1 left-1 text-[#99aabb]" />
+                            )}
+                        </div>
+                        Created by <span className="font-bold">{list.profiles.username}</span>
+                    </Link>
+
+                    {isOwner && (
+                        <DeleteListButton listId={list.id} />
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
