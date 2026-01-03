@@ -8,6 +8,16 @@ const nextConfig: NextConfig = {
         hostname: 'image.tmdb.org',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '**.github.io',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.supabase.co',
+        pathname: '/**',
+      },
     ],
   },
 };

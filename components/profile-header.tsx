@@ -1,22 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { User, MapPin, Link as LinkIcon, Calendar, Edit2 } from 'lucide-react';
 import { getImageUrl } from '@/lib/tmdb';
 import EditProfileModal from './edit-profile-modal';
+import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/components/auth-provider';
 
 interface ProfileHeaderProps {
-    profile: any; // Using any for now to match flexible DB type or define interface
-    isOwnProfile: boolean;
+    profile: any;
+    isOwnProfile: boolean; // Keeping prop for backwards compat, but will override with client check
     stats: {
         watchedCount: number;
         listsCount: number;
     }
 }
 
-export default function ProfileHeader({ profile, isOwnProfile, stats }: ProfileHeaderProps) {
+export default function ProfileHeader({ profile, stats }: ProfileHeaderProps) {
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const searchParams = useSearchParams();
+    const { user } = useAuth();
+
+    // Client-side calculations are more reliable for session in this setup
+    const isOwnProfile = user?.id === profile.id;
+
+    useEffect(() => {
+        const editParam = searchParams.get('edit');
+        if (isOwnProfile && editParam === 'true') {
+            setIsEditOpen(true);
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, '', newUrl);
+        }
+    }, [isOwnProfile, searchParams]);
 
     // Determine banner image: custom URL, TMDB path, or default gradient
     const bannerUrl = profile.banner_path?.startsWith('/')
