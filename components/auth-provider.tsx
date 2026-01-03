@@ -9,6 +9,11 @@ type Profile = {
     id: string;
     username: string;
     avatar_url: string | null;
+    bio: string | null;
+    banner_path: string | null;
+    location: string | null;
+    website: string | null;
+    favorite_show_ids: number[] | null;
 };
 
 type AuthContextType = {
