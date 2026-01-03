@@ -7,6 +7,8 @@ import ActivityFeed from '@/components/activity-feed';
 import { supabase } from '@/lib/supabase';
 import { getRecommendations } from '@/lib/tmdb';
 
+import AIAssistant from '@/components/ai-assistant';
+
 // We fetch directly in the server component for the initial render
 export default async function Home() {
   let trendingShows = [];
@@ -62,7 +64,7 @@ export default async function Home() {
         `)
         .in('user_id', followingIds)
         .order('watched_at', { ascending: false })
-        .limit(10);
+        .limit(1);
 
       if (activity) friendActivity = activity;
     }
@@ -133,6 +135,11 @@ export default async function Home() {
             </div>
           </>
         )}
+      </section>
+
+      {/* AI Assistant Section */}
+      <section className="container-custom relative -mt-8 z-30">
+        <AIAssistant />
       </section>
 
       {/* Genres Section */}
