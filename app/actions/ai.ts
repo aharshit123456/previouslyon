@@ -68,14 +68,20 @@ export async function getAIRecommendations(userQuery: string) {
     `;
 
         // 5. Call Gemini
+        console.log("Sending prompt to Gemini...");
         const result = await geminiModel.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
 
+        console.log("Gemini Raw Response:", text);
+
         // Clean up markdown code blocks if present (Gemini sometimes adds ```json ... ```)
         const cleanedText = text.replace(/```json\n?|\n?```/g, '').trim();
 
-        return JSON.parse(cleanedText);
+        const parsed = JSON.parse(cleanedText);
+        console.log("Parsed AI Response:", parsed);
+
+        return parsed;
 
     } catch (error) {
         console.error("AI Recommendation Error:", error);

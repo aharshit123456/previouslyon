@@ -13,6 +13,7 @@ export async function fetchRecommendationsAction(id: string | number) {
 }
 
 export async function fetchShowsByIds(ids: number[]) {
+    console.log("Fetching shows details for IDs:", ids);
     try {
         const promises = ids.map(id => getShowDetails(id));
         const results = await Promise.all(promises);
