@@ -5,9 +5,30 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { User } from 'lucide-react';
+import type { Metadata } from 'next';
 
 // Force dynamic since we fetch data that might change
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params;
+    const { data: list } = await supabase
+        .from('lists')
+        .select('name, description')
+        .eq('id', id)
+        .single();
+
+    if (!list) return { title: 'List Not Found' };
+
+    return {
+        title: list.name,
+        description: list.description || `A curated list of TV shows on PreviouslyOn.`,
+        openGraph: {
+            title: list.name,
+            description: list.description || undefined,
+        }
+    };
+}
 
 export default async function ListDetailsPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -44,8 +65,32 @@ export default async function ListDetailsPage({ params }: { params: Promise<{ id
 
     console.log(`[ListDetail] Items fetch result for list ${id}:`, { count: items?.length, error: itemsError });
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: list.name,
+        description: list.description,
+        author: {
+            '@type': 'Person',
+            name: list.profiles.username
+        },
+        mainEntity: {
+            '@type': 'ItemList',
+            itemListElement: items?.map((item: any, index: number) => ({
+                '@type': 'ListItem',
+                position: index + 1,
+                name: item.shows?.name,
+                image: getImageUrl(item.shows?.poster_path)
+            }))
+        }
+    };
+
     return (
         <div className="container-custom py-10">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             <div className="text-center mb-10">
                 <h1 className="text-4xl font-bold text-white mb-4">{list.name}</h1>
                 <p className="text-[#99aabb] max-w-2xl mx-auto mb-6">{list.description}</p>

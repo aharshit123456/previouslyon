@@ -6,8 +6,33 @@ import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
 import ProfileHeader from '@/components/profile-header';
 import ListCard from '@/components/list-card';
+import type { Metadata } from 'next';
 
 export const revalidate = 0; // Force fresh data on profile load
+
+export async function generateMetadata({ params }: { params: Promise<{ username: string }> }): Promise<Metadata> {
+    const { username } = await params;
+    const decodedUsername = decodeURIComponent(username);
+
+    // We instantiate supabase client here or import a shared one if safe
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .ilike('username', decodedUsername)
+        .single();
+
+    if (!profile) return { title: 'User Not Found' };
+
+    return {
+        title: `${profile.username}'s Profile`,
+        description: profile.bio || `Check out ${profile.username}'s TV show lists and watch history on PreviouslyOn.`,
+        openGraph: {
+            title: `${profile.username} on PreviouslyOn`,
+            description: profile.bio || `Check out ${profile.username}'s TV show lists.`,
+            images: profile.avatar_url ? [{ url: profile.avatar_url }] : [],
+        }
+    };
+}
 
 export default async function UserProfile({ params }: { params: Promise<{ username: string }> }) {
     const { username } = await params;
@@ -141,8 +166,27 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
         };
     }) || [];
 
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'Person',
+        name: profile.username,
+        image: profile.avatar_url,
+        description: profile.bio,
+        interactionStatistic: [
+            {
+                '@type': 'InteractionCounter',
+                interactionType: 'https://schema.org/WatchAction',
+                userInteractionCount: watchedCount
+            }
+        ]
+    };
+
     return (
         <div className="pb-20">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             {/* New Profile Header - Client Component */}
             <Suspense fallback={<div className="h-64 bg-[#14181c] animate-pulse" />}>
                 <ProfileHeader

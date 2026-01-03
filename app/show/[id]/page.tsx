@@ -4,6 +4,35 @@ import Link from 'next/link';
 import ShowActions from '@/components/show-actions';
 import Image from 'next/image';
 import { Calendar, Star, Clock } from 'lucide-react';
+import type { Metadata } from 'next';
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+    const { id } = await params;
+    try {
+        const show = await getShowDetails(id);
+        const year = show.first_air_date ? new Date(show.first_air_date).getFullYear() : '';
+        return {
+            title: `${show.name} (${year})`,
+            description: show.overview,
+            openGraph: {
+                title: `${show.name} (${year})`,
+                description: show.overview,
+                images: [
+                    {
+                        url: getImageUrl(show.backdrop_path, 'original'),
+                        width: 1200,
+                        height: 630,
+                        alt: show.name,
+                    },
+                ],
+            },
+        };
+    } catch {
+        return {
+            title: 'Show Not Found',
+        };
+    }
+}
 
 export default async function ShowPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -16,10 +45,33 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
     if (!show) return <div className="p-10 text-center">Show not found</div>;
 
+    // JSON-LD for SEO
+    const jsonLd = {
+        '@context': 'https://schema.org',
+        '@type': 'TVSeries',
+        name: show.name,
+        description: show.overview,
+        image: getImageUrl(show.poster_path),
+        aggregateRating: show.vote_average > 0 ? {
+            '@type': 'AggregateRating',
+            ratingValue: show.vote_average,
+            bestRating: 10,
+            worstRating: 1,
+            ratingCount: show.vote_count
+        } : undefined,
+        startDate: show.first_air_date,
+        numberOfSeasons: show.number_of_seasons,
+        numberOfEpisodes: show.number_of_episodes,
+    };
+
     const year = show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'Unknown';
 
     return (
         <div className="pb-20">
+            <script
+                type="application/ld+json"
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
             {/* Backdrop Header */}
             <div className="relative h-[50vh] w-full">
                 <Image
