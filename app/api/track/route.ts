@@ -54,8 +54,8 @@ export async function POST(request: Request) {
 
             if (epError) console.error("Episode Upsert Error", epError);
 
-            // 3. Upsert Progress (User Context)
-            const { error: progError } = await supabase
+            // 3. Upsert Progress (User Context - using Admin to bypass RLS since we verified user)
+            const { error: progError } = await supabaseAdmin
                 .from('user_episode_progress')
                 .insert({
                     user_id: user.id,
@@ -76,7 +76,7 @@ export async function POST(request: Request) {
             const { episodeId } = body;
 
             // Delete progress
-            const { error } = await supabase
+            const { error } = await supabaseAdmin
                 .from('user_episode_progress')
                 .delete()
                 .eq('user_id', user.id)
