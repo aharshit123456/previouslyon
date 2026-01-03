@@ -3,6 +3,7 @@ import { getTrendingShows, getImageUrl, getTVGenres } from '@/lib/tmdb';
 import Link from 'next/link';
 import Image from 'next/image';
 import RecommendedShows from '@/components/recommended-shows';
+import ActivityFeed from '@/components/activity-feed';
 import { supabase } from '@/lib/supabase';
 import { getRecommendations } from '@/lib/tmdb';
 
@@ -27,6 +28,45 @@ export default async function Home() {
   // --- Personalization Algo ---
   let recommendedShows: any[] = [];
   const { data: { session } } = await supabase.auth.getSession();
+
+  let friendActivity: any[] = [];
+  if (session?.user) {
+    // Fetch Friend Activity
+    const { data: following } = await supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', session.user.id);
+
+    if (following && following.length > 0) {
+      const followingIds = following.map(f => f.following_id);
+
+      const { data: activity } = await supabase
+        .from('user_episode_progress')
+        .select(`
+          id,
+          watched_at,
+          user_id,
+          profiles:user_id (
+            username,
+            avatar_url
+          ),
+          episodes (
+            season_number,
+            episode_number,
+            shows (
+              id,
+              name,
+              poster_path
+            )
+          )
+        `)
+        .in('user_id', followingIds)
+        .order('watched_at', { ascending: false })
+        .limit(10);
+
+      if (activity) friendActivity = activity;
+    }
+  }
 
   if (session?.user) {
     // 1. Get all shows in user's lists
@@ -110,6 +150,13 @@ export default async function Home() {
           ))}
         </div>
       </section>
+
+      {/* Friend Activity Feed */}
+      {friendActivity.length > 0 && (
+        <div className="container-custom mt-8">
+          <ActivityFeed activities={friendActivity} />
+        </div>
+      )}
 
       {/* Recommended for You (Personalized - Client Side) */}
       <RecommendedShows />

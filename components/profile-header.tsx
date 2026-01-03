@@ -7,17 +7,21 @@ import { getImageUrl } from '@/lib/tmdb';
 import EditProfileModal from './edit-profile-modal';
 import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/components/auth-provider';
+import FollowButton from './follow-button';
 
 interface ProfileHeaderProps {
     profile: any;
     isOwnProfile: boolean; // Keeping prop for backwards compat, but will override with client check
+    isFollowing?: boolean;
     stats: {
         watchedCount: number;
         listsCount: number;
+        followersCount?: number;
+        followingCount?: number;
     }
 }
 
-export default function ProfileHeader({ profile, stats }: ProfileHeaderProps) {
+export default function ProfileHeader({ profile, isFollowing, stats }: ProfileHeaderProps) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const searchParams = useSearchParams();
     const { user } = useAuth();
@@ -97,14 +101,19 @@ export default function ProfileHeader({ profile, stats }: ProfileHeaderProps) {
                         </div>
 
                         {/* Actions */}
-                        {isOwnProfile && (
-                            <button
-                                onClick={() => setIsEditOpen(true)}
-                                className="px-4 py-2 bg-[#2c3440] hover:bg-[#3c4656] text-white rounded-lg font-medium transition-colors flex items-center gap-2 border border-[#445566] shadow-lg"
-                            >
-                                <Edit2 className="w-4 h-4" /> Edit Profile
-                            </button>
-                        )}
+                        <div className="flex gap-2">
+                            {isOwnProfile && (
+                                <button
+                                    onClick={() => setIsEditOpen(true)}
+                                    className="px-4 py-2 bg-[#2c3440] hover:bg-[#3c4656] text-white rounded-lg font-medium transition-colors flex items-center gap-2 border border-[#445566] shadow-lg"
+                                >
+                                    <Edit2 className="w-4 h-4" /> Edit Profile
+                                </button>
+                            )}
+                            {!isOwnProfile && (
+                                <FollowButton targetUserId={profile.id} initialIsFollowing={!!isFollowing} />
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -121,8 +130,13 @@ export default function ProfileHeader({ profile, stats }: ProfileHeaderProps) {
                         <span className="text-xs uppercase tracking-wider text-[#99aabb]">Lists</span>
                     </div>
                     <div className="text-center md:text-left">
-                        <span className="block text-2xl font-bold text-white">0</span>
-                        <span className="text-xs uppercase tracking-wider text-[#99aabb]">Reviews</span>
+                        {/* Default to 0 if undefined for now */}
+                        <span className="block text-2xl font-bold text-white">{stats.followersCount || 0}</span>
+                        <span className="text-xs uppercase tracking-wider text-[#99aabb]">Followers</span>
+                    </div>
+                    <div className="text-center md:text-left">
+                        <span className="block text-2xl font-bold text-white">{stats.followingCount || 0}</span>
+                        <span className="text-xs uppercase tracking-wider text-[#99aabb]">Following</span>
                     </div>
                 </div>
             </div>
