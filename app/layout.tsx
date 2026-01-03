@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     creator: "@aharshit123456", // Assuming handle
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icon.svg",
   },
   manifest: "/manifest.json",
 };
@@ -52,19 +52,27 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col`}
+        className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col relative`}
       >
-        <AuthProvider>
-          <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
+        {/* Global Grid Background */}
+        <div className="fixed inset-0 z-0 pointer-events-none bg-grid-pattern opacity-60" />
 
-          <footer className="bg-[#2c3440] py-8 text-center text-sm text-[#99aabb]">
-            <div className="container-custom">
-              <p>© {new Date().getFullYear()} PreviouslyOn. Data provided by TMDB.</p>
-            </div>
-          </footer>
+        <AuthProvider>
+          <div className="relative z-10 flex flex-col min-h-screen">
+            <Navbar />
+            <main className="flex-grow">
+              {children}
+            </main>
+
+            <footer className="bg-white border-t border-gray-200 py-12 text-center text-sm text-gray-500 mt-20">
+              <div className="container-custom space-y-2">
+                <p>© {new Date().getFullYear()} PreviouslyOn. Data provided by TMDB.</p>
+                <p>
+                  This project is open source and available on <a href="https://github.com/aharshit123456/previouslyon" target="_blank" rel="noopener noreferrer" className="text-black font-bold hover:underline">GitHub</a>.
+                </p>
+              </div>
+            </footer>
+          </div>
         </AuthProvider>
       </body>
     </html>

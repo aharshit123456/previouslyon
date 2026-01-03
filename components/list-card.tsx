@@ -1,7 +1,8 @@
+
 import Link from 'next/link';
 import Image from 'next/image';
 import { getImageUrl } from '@/lib/tmdb';
-import { Lock, Globe } from 'lucide-react';
+import { Lock, Globe, ArrowRight } from 'lucide-react';
 
 interface ListCardProps {
     list: {
@@ -17,41 +18,38 @@ interface ListCardProps {
 export default function ListCard({ list }: ListCardProps) {
     return (
         <Link href={`/lists/${list.id}`} className="block group h-full">
-            <div className="bg-[#1c2229] border border-[#445566] rounded-xl overflow-hidden hover:border-sky-blue transition-colors h-full flex flex-col">
+            <div className="bg-[#1c2229] rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all h-full flex flex-col border border-[#2c3440] group-hover:border-primary/50">
                 {/* Poster Collage */}
-                <div className="aspect-video bg-[#0e1114] relative p-1 grid grid-cols-4 gap-0.5">
-                    {/* We take up to 4 posters. If fewer, we fill with placeholders or adjust logic. 
-                        Let's try a overlapping stack or a simple grid. Grid is cleaner for "flaunting".
-                    */}
+                <div className="aspect-[2/1] bg-[#14181c] relative grid grid-cols-4 gap-px border-b border-[#2c3440]">
                     {list.posters.slice(0, 4).map((poster, i) => (
-                        <div key={i} className="relative w-full h-full bg-[#2c3440] overflow-hidden first:rounded-l last:rounded-r">
+                        <div key={i} className="relative w-full h-full bg-[#2c3440] overflow-hidden">
                             <Image
                                 src={getImageUrl(poster)}
                                 alt="Show"
                                 fill
-                                className="object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                                className="object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
                             />
                         </div>
                     ))}
-                    {/* If empty */}
                     {list.posters.length === 0 && (
-                        <div className="col-span-4 flex items-center justify-center text-[#445566] text-xs">
+                        <div className="col-span-4 flex items-center justify-center text-gray-600 text-xs font-medium">
                             Empty List
                         </div>
                     )}
                 </div>
 
                 {/* Info */}
-                <div className="p-4 flex flex-col flex-grow">
-                    <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-bold text-white text-lg leading-tight group-hover:text-primary transition-colors line-clamp-1">{list.name}</h4>
-                        {list.is_public ? <Globe className="w-3 h-3 text-[#667788]" /> : <Lock className="w-3 h-3 text-red-300" />}
+                <div className="p-6 flex flex-col flex-grow">
+                    <div className="flex justify-between items-start mb-3">
+                        <h4 className="font-bold text-white text-xl leading-tight group-hover:text-primary transition-colors line-clamp-1">{list.name}</h4>
+                        {list.is_public ? <Globe className="w-4 h-4 text-gray-500" /> : <Lock className="w-4 h-4 text-amber-500" />}
                     </div>
 
-                    {list.description && <p className="text-sm text-[#99aabb] line-clamp-2 mb-3 flex-grow">{list.description}</p>}
+                    {list.description && <p className="text-sm text-gray-400 line-clamp-2 mb-4 flex-grow font-medium leading-relaxed">{list.description}</p>}
 
-                    <div className="pt-3 border-t border-[#2c3440] text-xs text-[#667788] uppercase tracking-wider font-semibold">
-                        {list.count} {list.count === 1 ? 'Show' : 'Shows'}
+                    <div className="mt-auto pt-4 border-t border-[#2c3440] flex justify-between items-center text-xs text-gray-500 font-bold uppercase tracking-wider">
+                        <span>{list.count} {list.count === 1 ? 'Show' : 'Shows'}</span>
+                        <ArrowRight className="w-4 h-4 text-gray-600 group-hover:text-primary group-hover:translate-x-1 transition-all" />
                     </div>
                 </div>
             </div>

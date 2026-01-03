@@ -3,7 +3,7 @@ import { getShowDetails, getImageUrl } from '@/lib/tmdb';
 import Link from 'next/link';
 import ShowActions from '@/components/show-actions';
 import Image from 'next/image';
-import { Calendar, Star, Clock } from 'lucide-react';
+import { Star, Clock, Calendar, Play, ArrowRight } from 'lucide-react';
 import type { Metadata } from 'next';
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -14,18 +14,6 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         return {
             title: `${show.name} (${year})`,
             description: show.overview,
-            openGraph: {
-                title: `${show.name} (${year})`,
-                description: show.overview,
-                images: [
-                    {
-                        url: getImageUrl(show.backdrop_path, 'original'),
-                        width: 1200,
-                        height: 630,
-                        alt: show.name,
-                    },
-                ],
-            },
         };
     } catch {
         return {
@@ -45,153 +33,158 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
     if (!show) return <div className="p-10 text-center">Show not found</div>;
 
-    // JSON-LD for SEO
-    const jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'TVSeries',
-        name: show.name,
-        description: show.overview,
-        image: getImageUrl(show.poster_path),
-        aggregateRating: show.vote_average > 0 ? {
-            '@type': 'AggregateRating',
-            ratingValue: show.vote_average,
-            bestRating: 10,
-            worstRating: 1,
-            ratingCount: show.vote_count
-        } : undefined,
-        startDate: show.first_air_date,
-        numberOfSeasons: show.number_of_seasons,
-        numberOfEpisodes: show.number_of_episodes,
-    };
-
     const year = show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'Unknown';
 
     return (
-        <div className="pb-20">
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        <div className="min-h-screen font-sans text-white bg-[#14181c] relative overflow-hidden">
+            {/* Grid Background */}
+            <div
+                className="absolute inset-0 z-0 pointer-events-none opacity-[0.2]"
+                style={{
+                    backgroundImage: `linear-gradient(to right, #2c3440 1px, transparent 1px), linear-gradient(to bottom, #2c3440 1px, transparent 1px)`,
+                    backgroundSize: '40px 40px'
+                }}
             />
-            {/* Backdrop Header */}
-            <div className="relative h-[50vh] w-full">
-                <Image
-                    src={getImageUrl(show.backdrop_path, 'original')}
-                    alt={show.name}
-                    fill
-                    className="object-cover opacity-30"
-                    priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#14181c] via-transparent to-transparent" />
-                <div className="absolute inset-0 bg-gradient-to-b from-[#14181c]/50 to-transparent" />
 
-                <div className="container-custom relative h-full flex flex-col justify-end pb-8">
-                    <div className="flex gap-8 items-end">
-                        {/* Poster */}
-                        <div className="relative w-40 shrink-0 aspect-[2/3] rounded overflow-hidden shadow-2xl border border-[#445566] hidden md:block">
-                            <Image
-                                src={getImageUrl(show.poster_path)}
-                                alt={show.name}
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
+            <div className="relative z-10 w-full max-w-[1600px] mx-auto p-6 md:p-12">
 
-                        {/* Text Info */}
-                        <div className="mb-2">
-                            <h1 className="text-4xl md:text-5xl font-bold text-white mb-2">{show.name} <span className="text-2xl text-gray-400 font-normal">({year})</span></h1>
-                            <div className="flex items-center gap-4 text-sm text-[#99aabb] mb-4">
-                                {show.vote_average > 0 && (
-                                    <span className="flex items-center gap-1 text-white">
-                                        <Star className="w-4 h-4 text-primary fill-primary" />
-                                        {show.vote_average.toFixed(1)}
-                                    </span>
-                                )}
-                                {show.episode_run_time?.[0] && (
-                                    <span className="flex items-center gap-1">
-                                        <Clock className="w-4 h-4" /> {show.episode_run_time[0]}m
-                                    </span>
-                                )}
-                            </div>
-                            <div className="flex items-center gap-2 mb-4">
-                                <span className="bg-[#2c3440] text-white text-xs font-bold px-2 py-1 rounded border border-[#445566]">TV SHOW</span>
-                                <span className="text-[#99aabb] font-bold">{show.first_air_date?.split('-')[0]}</span>
-                                <span className="text-[#99aabb]">•</span>
-                                <span className="text-[#99aabb]">{show.number_of_seasons} Seasons</span>
-                            </div>
 
-                            <p className="text-lg text-gray-300 leading-relaxed mb-6">{show.overview}</p>
 
-                            <div className="flex gap-2 flex-wrap mb-8">
-                                {show.genres?.map((g: any) => (
-                                    <span key={g.id} className="text-xs font-bold text-[#99aabb] uppercase tracking-wider border border-[#445566] px-3 py-1 rounded-full">{g.name}</span>
-                                ))}
-                            </div>
-
-                            <ShowActions show={{
-                                id: show.id,
-                                name: show.name,
-                                poster_path: show.poster_path,
-                                first_air_date: show.first_air_date
-                            }} />
-
-                        </div>
+                {/* Hero / Title Section */}
+                <div className="mb-20 text-center">
+                    <div className="inline-flex items-center gap-2 bg-[#1c2229] border border-[#2c3440] rounded-full px-4 py-1 mb-6 shadow-sm">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider">New Season</span>
+                        <span className="text-xs font-medium text-gray-400">Check out the latest episodes</span>
+                        <span className="bg-white/10 rounded-full p-1"><Play className="w-3 h-3 text-white" /></span>
                     </div>
-                </div>
-            </div>
 
-            <div className="container-custom mt-8 grid grid-cols-1 md:grid-cols-[250px_1fr] gap-10">
-                {/* Sidebar (Mobile Poster + Stats) */}
-                <div className="block">
-                    <div className="bg-[#1c2229] p-4 rounded border border-[#445566]">
-                        <div className="text-xs font-bold text-[#99aabb] uppercase tracking-wider mb-3">Rate</div>
-                        <div className="flex justify-between text-2xl text-[#445566]">
-                            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
-                        </div>
-                        <div className="my-4 border-t border-[#445566]" />
-                        <div className="space-y-2 text-sm text-[#99aabb]">
-                            <div className="flex justify-between">
-                                <span>Episodes</span>
-                                <span className="text-white">{show.number_of_episodes}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Status</span>
-                                <span className="text-white">{show.status}</span>
-                            </div>
-                        </div>
+                    <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tight leading-[0.9] mb-8 uppercase text-white">
+                        {show.name}
+                    </h1>
+
+                    <p className="max-w-3xl mx-auto text-xl md:text-2xl text-gray-400 leading-relaxed font-medium mb-10">
+                        {show.tagline || `${show.name} is a top-rated TV show released in ${year}.`}
+                    </p>
+
+                    <div className="flex justify-center gap-4">
+                        <ShowActions show={{
+                            id: show.id,
+                            name: show.name,
+                            poster_path: show.poster_path,
+                            first_air_date: show.first_air_date
+                        }} />
+                        <button className="px-8 py-4 font-bold text-sm tracking-wider uppercase bg-[#ff4f00] text-white rounded-full hover:bg-[#e64700] transition-colors shadow-lg border border-transparent">
+                            Start Watching
+                        </button>
                     </div>
                 </div>
 
-                {/* Main Content */}
-                <div>
-                    <h3 className="text-sm font-bold text-[#99aabb] uppercase tracking-wider mb-2">Overview</h3>
-                    <p className="text-gray-300 leading-relaxed max-w-2xl mb-10">{show.overview}</p>
 
-                    <h3 className="text-lg font-bold text-white border-b border-[#445566] pb-2 mb-6 flex items-center justify-between">
-                        Seasons
-                        <span className="text-xs text-[#99aabb] font-normal uppercase tracking-wider">{show.number_of_seasons} Total</span>
-                    </h3>
+                {/* Main Content Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-20">
 
-                    <div className="space-y-4">
+                    {/* Card 1: Overview (Dark) */}
+                    <div className="lg:col-span-7 bg-[#1c2229] rounded-3xl p-10 md:p-14 shadow-2xl flex flex-col justify-center relative overflow-hidden group border border-[#2c3440]">
+                        <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <Star className="w-32 h-32 text-white" />
+                        </div>
+
+                        <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight text-white">
+                            The Story So Far
+                        </h2>
+                        <p className="text-lg md:text-xl text-gray-400 leading-relaxed font-medium">
+                            {show.overview}
+                        </p>
+
+                        <div className="mt-10 flex gap-4 flex-wrap">
+                            {show.genres?.map((g: any) => (
+                                <span key={g.id} className="text-xs font-bold uppercase tracking-wider border-2 border-[#445566] text-gray-300 px-4 py-2 rounded-full hover:bg-white hover:text-black hover:border-white transition-colors cursor-default">
+                                    {g.name}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Card 2: Stats (Double Dark / Contrast) */}
+                    <div className="lg:col-span-5 bg-black text-white rounded-3xl p-10 md:p-14 shadow-2xl relative overflow-hidden flex flex-col border border-[#2c3440]">
+                        <div className="flex justify-between items-start mb-12">
+                            <h3 className="text-2xl font-bold">Details</h3>
+                            <div className="flex gap-2 text-[#fbbf24]">
+                                <span className="text-xs font-mono">ID: {show.id}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex-1 flex flex-col justify-center space-y-10 font-mono text-sm">
+                            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                                <span className="text-gray-500">RATING</span>
+                                <div className="flex items-center gap-2 text-[#fbbf24]">
+                                    <Star className="w-5 h-5 fill-current" />
+                                    <span className="text-2xl">{show.vote_average.toFixed(1)}</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                                <span className="text-gray-500">RELEASED</span>
+                                <span className="text-xl">{year}</span>
+                            </div>
+
+                            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                                <span className="text-gray-500">SEASONS</span>
+                                <span className="text-xl text-primary">{show.number_of_seasons}</span>
+                            </div>
+
+                            <div className="flex items-center justify-between border-b border-gray-800 pb-4">
+                                <span className="text-gray-500">STATUS</span>
+                                <span className="text-xl">{show.status}</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-12 space-y-3">
+                            <div className="flex items-center gap-4 text-xs font-mono text-gray-500">
+                                <span>POPULARITY</span>
+                                <div className="flex-1 h-1 bg-gray-800 rounded-full overflow-hidden">
+                                    <div className="h-full bg-primary w-[80%]" />
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4 text-xs font-mono text-gray-500">
+                                <span>VOTE COUNT</span>
+                                <div className="flex-1 h-1 bg-gray-800 rounded-full overflow-hidden">
+                                    <div className="h-full bg-[#fbbf24] w-[60%]" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* Seasons List */}
+                <div className="mb-20">
+                    <h3 className="text-3xl font-black uppercase mb-10 text-center text-white">Seasons</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {show.seasons?.filter((s: any) => s.season_number > 0).map((season: any) => (
-                            <Link key={season.id} href={`/show/${show.id}/season/${season.season_number}`} className="flex gap-4 p-4 bg-[#1c2229] rounded border border-[#445566] hover:border-primary transition-colors group">
-                                <div className="relative w-16 aspect-[2/3] shrink-0 bg-[#2c3440] rounded overflow-hidden">
+                            <Link key={season.id} href={`/show/${show.id}/season/${season.season_number}`} className="group relative bg-[#1c2229] border border-[#2c3440] rounded-2xl overflow-hidden hover:shadow-xl transition-all hover:border-gray-500">
+                                <div className="aspect-video relative overflow-hidden bg-[#0e1114]">
                                     {season.poster_path ? (
-                                        <Image src={getImageUrl(season.poster_path)} alt={season.name} fill className="object-cover" />
+                                        <Image src={getImageUrl(season.poster_path)} alt={season.name} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
                                     ) : (
-                                        <div className="flex items-center justify-center h-full text-xs text-gray-500">No Img</div>
+                                        <div className="flex items-center justify-center h-full text-gray-600">No Image</div>
                                     )}
+                                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <span className="text-white font-bold uppercase tracking-widest border border-white px-4 py-2 rounded-full text-sm">View Season</span>
+                                    </div>
                                 </div>
-                                <div className="flex flex-col justify-center">
-                                    <h4 className="text-lg font-bold text-white group-hover:text-primary transition-colors">{season.name}</h4>
-                                    <p className="text-sm text-[#99aabb]">{season.episode_count} Episodes • {season.air_date ? new Date(season.air_date).getFullYear() : 'TBA'}</p>
-                                </div>
-                                <div className="ml-auto flex items-center pr-4">
-                                    <span className="text-xs font-bold text-[#445566] group-hover:text-[#99aabb]">VIEW SEASON →</span>
+                                <div className="p-6">
+                                    <h4 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors text-white">{season.name}</h4>
+                                    <div className="flex justify-between items-center text-sm font-medium text-gray-500">
+                                        <span>{season.episode_count} Episodes</span>
+                                        <span>{season.air_date ? new Date(season.air_date).getFullYear() : 'TBA'}</span>
+                                    </div>
                                 </div>
                             </Link>
                         ))}
                     </div>
                 </div>
+
             </div>
         </div>
     );

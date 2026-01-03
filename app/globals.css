@@ -1,30 +1,27 @@
 @import "tailwindcss";
 
 :root {
-  /* Pastel Palette */
-  --thistle: #cdb4db;
-  --pastel-petal: #ffc8dd;
-  --baby-pink: #ffafcc;
-  --icy-blue: #bde0fe;
-  --sky-blue: #a2d2ff;
-
+  /* Dark Mux Palette */
   --background: #14181c;
+  /* Deep Dark */
   --foreground: #ffffff;
 
-  /* Primary Action Color - Sky Blue for high contrast on dark */
-  --primary: var(--sky-blue);
-  --primary-hover: var(--icy-blue);
+  /* Brand Colors */
+  --primary: #ff4f00;
+  /* Mux Orange */
+  --primary-hover: #e64700;
 
-  /* Secondary/Accent - Baby Pink */
-  --accent: var(--baby-pink);
+  --accent: #fbbf24;
+  /* Amber/Yellow for accents */
 
-  --secondary: #2c3440;
-  /* Card bg */
-  --secondary-hover: #445566;
+  --secondary: #1c2229;
+  /* Card Background (Darker) */
+  --secondary-hover: #2c3440;
+
   --text-primary: #ffffff;
   --text-secondary: #99aabb;
-  --header-bg: #14181c;
-  --border-color: #445566;
+
+  --border-color: #2c3440;
 }
 
 body {
@@ -40,11 +37,18 @@ body {
   }
 }
 
+/* Global Grid Pattern (Adapted for Dark Mode) */
+.bg-grid-pattern {
+  background-image: linear-gradient(to right, #2c3440 1px, transparent 1px),
+    linear-gradient(to bottom, #2c3440 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
 /* Custom Utilities */
 .container-custom {
-  max-width: 950px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1rem;
+  padding: 0 1.5rem;
 }
 
 .card-hover {
@@ -52,8 +56,6 @@ body {
 }
 
 .card-hover:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-  z-index: 10;
-  outline: 2px solid var(--primary);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
 }

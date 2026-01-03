@@ -18,10 +18,10 @@ export default function ShowActions({ show }: ShowActionsProps) {
 
     return (
         <>
-            <div className="flex gap-4 mt-6">
+            <div className="flex gap-4">
                 <button
                     onClick={() => setModalOpen(true)}
-                    className="bg-[#2c3440] hover:bg-[#3c4656] text-white py-2 px-6 rounded font-bold flex items-center gap-2 transition-colors border border-[#445566]"
+                    className="bg-white hover:bg-black hover:text-white text-black py-4 px-8 rounded-full font-bold text-sm uppercase tracking-wider flex items-center gap-2 transition-all border-2 border-black shadow-lg"
                 >
                     <Plus className="w-4 h-4" /> Add to List
                 </button>
