@@ -37,7 +37,7 @@ export async function GET(request: Request) {
                 Return valid JSON with:
                 - title: A creative title for the list.
                 - description: A short description (2 sentences).
-                - shows: An array of TMDB TV Show IDs (integers). Provide 5 distinct shows.
+                - shows: An array of TMDB TV Show IDs (integers). Provide 20 distinct shows.
                 Example: { "title": "Cyberpunk Classics", "description": "...", "shows": [123, 456] }
             `;
 
@@ -81,11 +81,8 @@ export async function GET(request: Request) {
                             id: tmdbShow.id,
                             name: tmdbShow.name,
                             poster_path: tmdbShow.poster_path,
-                            overview: tmdbShow.overview,
-                            first_air_date: tmdbShow.first_air_date,
+                            first_air_date: tmdbShow.first_air_date ? tmdbShow.first_air_date : null,
                             vote_average: tmdbShow.vote_average,
-                            vote_count: tmdbShow.vote_count
-                            // Add other fields if your schema requires them
                         }, { onConflict: 'id' });
 
                     if (showUpsertError) {

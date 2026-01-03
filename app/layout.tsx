@@ -8,7 +8,7 @@ import Navbar from "@/components/navbar";
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://previouslyon.vercel.app"),
   title: {
     default: "PreviouslyOn - Track Your TV Shows",
     template: "%s | PreviouslyOn",
