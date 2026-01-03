@@ -102,9 +102,14 @@ export default function SeasonView({ show: showProp, seasonNumber, episodes }: S
                     'Authorization': `Bearer ${session.access_token}`
                 },
                 body: JSON.stringify({
-                    show: showProp, // Using the prop we will add
-                    episode: { ...episode, show_id: showProp.id },
-                    action
+                    action,
+                    showId: showProp.id,
+                    episodeId: episode.id,
+                    seasonNumber,
+                    episodeNumber: episode.episode_number,
+                    showName: showProp.name,
+                    showPoster: showProp.poster_path,
+                    showDate: showProp.first_air_date
                 })
             });
 
