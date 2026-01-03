@@ -59,7 +59,10 @@ export async function POST(request: Request) {
                 .from('user_episode_progress')
                 .insert({
                     user_id: user.id,
-                    episode_id: episodeId
+                    episode_id: episodeId,
+                    show_id: showId,
+                    season_number: seasonNumber,
+                    episode_number: episodeNumber
                 });
 
             if (progError) {

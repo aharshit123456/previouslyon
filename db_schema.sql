@@ -52,6 +52,9 @@ create table public.user_episode_progress (
   id uuid default uuid_generate_v4() primary key,
   user_id uuid references public.profiles(id) not null,
   episode_id integer references public.episodes(id) not null,
+  show_id integer references public.shows(id), -- Smart Schema addition
+  season_number integer,
+  episode_number integer,
   watched_at timestamp with time zone default now(),
   
   unique(user_id, episode_id) -- Simple tracking for now, rewatch viewing log would need a separate table or different primary key
@@ -71,6 +74,12 @@ create table public.reviews (
   entity_id integer not null, -- TMDB ID of the entity
   rating integer check (rating >= 1 and rating <= 10),
   body text,
+  
+  -- Smart Schema: Direct links for easier joins
+  show_id integer references public.shows(id),
+  season_number integer,
+  episode_number integer,
+  
   created_at timestamp with time zone default now()
 );
 

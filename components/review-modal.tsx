@@ -13,9 +13,23 @@ interface ReviewModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSubmit: () => void;
+    // New fields for Smart Schema
+    showId?: number;
+    seasonNumber?: number;
+    episodeNumber?: number;
 }
 
-export default function ReviewModal({ entityType, entityId, entityName, isOpen, onClose, onSubmit }: ReviewModalProps) {
+export default function ReviewModal({
+    entityType,
+    entityId,
+    entityName,
+    isOpen,
+    onClose,
+    onSubmit,
+    showId,
+    seasonNumber,
+    episodeNumber
+}: ReviewModalProps) {
     const { user } = useAuth();
     const [rating, setRating] = useState(0);
     const [body, setBody] = useState('');
@@ -36,7 +50,11 @@ export default function ReviewModal({ entityType, entityId, entityName, isOpen, 
                 entity_type: entityType,
                 entity_id: entityId,
                 rating,
-                body
+                body,
+                // Smart Schema Fields
+                show_id: showId,
+                season_number: seasonNumber,
+                episode_number: episodeNumber
             }]);
 
         if (!error) {

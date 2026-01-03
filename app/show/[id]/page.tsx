@@ -33,6 +33,15 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
 
     if (!show) return <div className="p-10 text-center">Show not found</div>;
 
+    let watchProviders = null;
+    try {
+        const { getWatchProviders } = await import('@/lib/tmdb');
+        watchProviders = await getWatchProviders(id);
+    } catch (e) {
+        console.error("WP Error", e);
+    }
+    const providers = watchProviders?.results?.['IN'] || watchProviders?.results?.['US'];
+
     const year = show.first_air_date ? new Date(show.first_air_date).getFullYear() : 'Unknown';
 
     return (
@@ -65,6 +74,20 @@ export default async function ShowPage({ params }: { params: Promise<{ id: strin
                     <p className="max-w-3xl mx-auto text-xl md:text-2xl text-gray-400 leading-relaxed font-medium mb-10">
                         {show.tagline || `${show.name} is a top-rated TV show released in ${year}.`}
                     </p>
+
+                    {/* Watch Providers Badge */}
+                    {providers && providers.flatrate && (
+                        <div className="flex flex-col items-center gap-3 mb-10">
+                            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Streaming on</span>
+                            <div className="flex -space-x-2 hover:space-x-1 transition-all">
+                                {providers.flatrate.map((p: any) => (
+                                    <div key={p.provider_id} title={p.provider_name} className="relative w-10 h-10 rounded-full overflow-hidden border-2 border-[#1c2229] shadow-lg bg-[#1c2229] hover:scale-110 transition-transform z-10 hover:z-20 cursor-help">
+                                        <Image src={getImageUrl(p.logo_path)} alt={p.provider_name} fill className="object-cover" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex justify-center gap-4">
                         <ShowActions show={{

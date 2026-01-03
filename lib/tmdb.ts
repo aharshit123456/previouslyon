@@ -40,6 +40,14 @@ export const getSeasonDetails = async (id: string | number, seasonNumber: number
     return tmdbFetch(`/tv/${id}/season/${seasonNumber}`);
 };
 
+export const getEpisodeDetails = async (id: string | number, seasonNumber: number, episodeNumber: number) => {
+    return tmdbFetch(`/tv/${id}/season/${seasonNumber}/episode/${episodeNumber}`);
+};
+
+export const getWatchProviders = async (id: string | number) => {
+    return tmdbFetch(`/tv/${id}/watch/providers`);
+};
+
 // Image Helper
 export const getImageUrl = (path: string | null, size: 'w500' | 'original' = 'w500') => {
     if (!path) return '';

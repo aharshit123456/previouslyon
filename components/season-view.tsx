@@ -130,10 +130,10 @@ export default function SeasonView({ show: showProp, seasonNumber, episodes }: S
 
     // State for Review Modal
     const [reviewModalOpen, setReviewModalOpen] = useState(false);
-    const [reviewingEpisode, setReviewingEpisode] = useState<{ id: number, name: string } | null>(null);
+    const [reviewingEpisode, setReviewingEpisode] = useState<{ id: number, name: string, episode_number: number } | null>(null);
 
     const openReview = (episode: Episode) => {
-        setReviewingEpisode({ id: episode.id, name: episode.name });
+        setReviewingEpisode({ id: episode.id, name: episode.name, episode_number: episode.episode_number });
         setReviewModalOpen(true);
     }
 
@@ -223,6 +223,9 @@ export default function SeasonView({ show: showProp, seasonNumber, episodes }: S
                     onSubmit={() => {
                         // Could refresh reviews list if we showed them inline
                     }}
+                    showId={showProp.id}
+                    seasonNumber={seasonNumber}
+                    episodeNumber={reviewingEpisode.episode_number}
                 />
             )}
         </>

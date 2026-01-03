@@ -10,7 +10,7 @@ const genAI = new GoogleGenerativeAI(apiKey || "");
 
 // specific model can be changed here
 export const geminiModel = genAI.getGenerativeModel({
-    model: "gemini-3-flash-preview",
+    model: "gemini-2.5-flash-lite",
     generationConfig: {
         responseMimeType: "application/json",
     }
