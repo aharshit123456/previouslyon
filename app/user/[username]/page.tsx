@@ -135,7 +135,8 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
 
     console.log('[UserProfile] Reviews fetch:', { count: rawReviews?.length, error: reviewsError });
 
-    let reviews = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let reviews: any[] = [];
     if (rawReviews && rawReviews.length > 0) {
         const showIds = rawReviews.map(r => r.entity_id);
         const { data: showsData } = await supabase
