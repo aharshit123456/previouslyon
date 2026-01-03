@@ -116,9 +116,11 @@ export default async function UserProfile({ params }: { params: Promise<{ userna
     const trackedShows = [];
     if (progressItems) {
         for (const item of progressItems) {
-            if (item.shows && !uniqueShowIds.has(item.shows.id)) {
-                uniqueShowIds.add(item.shows.id);
-                trackedShows.push(item.shows);
+            const show = Array.isArray(item.shows) ? item.shows[0] : item.shows;
+
+            if (show && !uniqueShowIds.has(show.id)) {
+                uniqueShowIds.add(show.id);
+                trackedShows.push(show);
             }
         }
     }
