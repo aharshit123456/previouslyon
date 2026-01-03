@@ -6,7 +6,7 @@ export async function GET() {
     try {
         const data = await getTrendingShows();
         return NextResponse.json(data);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch from TMDB' }, { status: 500 });
     }
 }

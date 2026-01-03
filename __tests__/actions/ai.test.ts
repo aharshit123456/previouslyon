@@ -15,6 +15,7 @@ jest.mock('@/lib/supabase-server', () => ({
 }));
 
 describe('AI Actions', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let mockSupabase: any;
 
     beforeEach(() => {

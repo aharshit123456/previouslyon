@@ -7,7 +7,7 @@ import { useAuth } from '@/components/auth-provider';
 import { Loader2 } from 'lucide-react';
 
 export default function NewListPage() {
-    const { user, profile } = useAuth();
+    const { user } = useAuth();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [isPublic, setIsPublic] = useState(true);

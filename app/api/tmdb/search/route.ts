@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     try {
         const data = await searchShows(query);
         return NextResponse.json(data);
-    } catch (error) {
+    } catch {
         return NextResponse.json({ error: 'Failed to fetch from TMDB' }, { status: 500 });
     }
 }

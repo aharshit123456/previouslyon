@@ -63,7 +63,7 @@ export default async function ListDetailsPage({ params }: { params: Promise<{ id
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                {items?.map((item: any) => {
+                {items?.map((item: { id: number; shows: { id: number; name: string; poster_path: string; first_air_date: string } | null }) => {
                     const show = item.shows;
                     if (!show) return null;
 

@@ -11,7 +11,7 @@ import AIAssistant from '@/components/ai-assistant';
 
 // We fetch directly in the server component for the initial render
 export default async function Home() {
-  let trendingShows = [];
+  let trendingShows: { id: number; name: string; overview: string; backdrop_path: string; poster_path: string }[] = [];
   try {
     const data = await getTrendingShows();
     trendingShows = data.results || [];
@@ -19,7 +19,7 @@ export default async function Home() {
     console.error("Failed to fetch trending shows", e);
   }
 
-  let genres = [];
+  let genres: { id: number; name: string }[] = [];
   try {
     const genreData = await getTVGenres();
     genres = genreData.genres || [];
@@ -28,7 +28,7 @@ export default async function Home() {
   }
 
   // --- Personalization Algo ---
-  let recommendedShows: any[] = [];
+  let recommendedShows: { id: number; name: string; poster_path: string }[] = [];
   const { data: { session } } = await supabase.auth.getSession();
 
   let friendActivity: any[] = [];
@@ -77,11 +77,12 @@ export default async function Home() {
       .select('show_id, lists!inner(user_id)')
       .eq('lists.user_id', session.user.id);
 
-    const userShowIds = userListItems?.map((item: any) => item.show_id) || [];
+    const userShowIds = userListItems?.map((item: { show_id: number }) => item.show_id) || [];
 
     // 2. Condition: > 2 shows
     if (userShowIds.length > 2) {
       // 3. Pick up to 3 random shows to base recommendations on
+      // eslint-disable-next-line react-hooks/purity
       const shuffled = userShowIds.sort(() => 0.5 - Math.random());
       const sourceIds = shuffled.slice(0, 3);
 
@@ -90,10 +91,10 @@ export default async function Home() {
         const results = await Promise.all(promises);
 
         // 4. Aggregate & Deduplicate
-        const allRecs = results.flatMap((r: any) => r.results || []);
+        const allRecs = results.flatMap((r: { results: any[] }) => r.results || []);
         const uniqueRecs = new Map();
 
-        allRecs.forEach((show: any) => {
+        allRecs.forEach((show: { id: number; name: string; poster_path: string }) => {
           // Filter out shows user already has
           if (!userShowIds.includes(show.id)) {
             uniqueRecs.set(show.id, show);
@@ -101,6 +102,7 @@ export default async function Home() {
         });
 
         recommendedShows = Array.from(uniqueRecs.values())
+          // eslint-disable-next-line react-hooks/purity
           .sort(() => 0.5 - Math.random()) // Shuffle results
           .slice(0, 10); // Take 10
       } catch (e) {
@@ -146,7 +148,7 @@ export default async function Home() {
       <section className="container-custom mt-8">
         <h2 className="text-sm font-bold text-[#99aabb] uppercase tracking-wider mb-4">Browse by Genre</h2>
         <div className="flex flex-wrap gap-2">
-          {genres.map((genre: any) => (
+          {genres.map((genre) => (
             <Link
               key={genre.id}
               href={`/search?q=${encodeURIComponent(genre.name)}`}
@@ -175,7 +177,7 @@ export default async function Home() {
         </h2>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-          {trendingShows.map((show: any) => (
+          {trendingShows.map((show) => (
             <Link key={show.id} href={`/show/${show.id}`} className="group relative block aspect-[2/3] bg-[#2c3440] rounded overflow-hidden card-hover">
               {show.poster_path ? (
                 <Image

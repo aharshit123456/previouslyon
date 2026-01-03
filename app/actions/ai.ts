@@ -35,9 +35,10 @@ export async function getAIRecommendations(userQuery: string) {
             .eq('user_id', user.id)
             .limit(3);
 
-        // Flatten lists for the prompt
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const listContext = lists?.map(l => {
-            const showNames = l.list_items?.map((item: any) => item.shows?.name).filter(Boolean).join(', ');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const showNames = l.list_items?.map((item: { shows: any }) => (Array.isArray(item.shows) ? item.shows[0]?.name : item.shows?.name)).filter(Boolean).join(', ');
             return `List "${l.name}": ${showNames}`;
         }).join('\n');
 

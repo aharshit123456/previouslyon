@@ -44,15 +44,27 @@ export default async function ListsIndexPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {lists?.map((list: any) => {
+                {lists?.map((list: {
+                    id: string;
+                    name: string;
+                    description: string;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    profiles: any;
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    list_items: any;
+                }) => {
                     // Get first 3 posters
-                    const posters = list.list_items?.slice(0, 3).map((item: any) => item.shows?.poster_path).filter(Boolean) || [];
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const posters = list.list_items?.slice(0, 3).map((item: any) => {
+                        const show = Array.isArray(item.shows) ? item.shows[0] : item.shows;
+                        return show?.poster_path;
+                    }).filter(Boolean) as string[] || [];
 
                     return (
                         <Link key={list.id} href={`/lists/${list.id}`} className="group bg-[#1c2229] border border-[#445566] rounded hover:border-[#556677] overflow-hidden flex flex-col h-full transition-colors">
                             {/* Preview Collage */}
                             <div className="h-32 bg-[#2c3440] flex items-center justify-center border-b border-[#445566] relative overflow-hidden">
-                                {posters.map((path: string, i: number) => (
+                                {posters.map((path, i) => (
                                     <div key={i} className="absolute h-full aspect-[2/3] transform transition-transform" style={{
                                         left: `calc(50% - 40px + ${i * 30}px)`,
                                         top: '10px',
@@ -67,7 +79,7 @@ export default async function ListsIndexPage() {
 
                             <div className="p-4 flex-grow">
                                 <h3 className="font-bold text-white group-hover:text-primary transition-colors text-lg mb-1 line-clamp-1">{list.name}</h3>
-                                <p className="text-[#445566] text-xs uppercase tracking-wider mb-2">by {list.profiles.username}</p>
+                                <p className="text-[#445566] text-xs uppercase tracking-wider mb-2">by {Array.isArray(list.profiles) ? list.profiles[0]?.username : list.profiles?.username}</p>
                                 <p className="text-[#99aabb] text-sm line-clamp-2 mb-4">{list.description}</p>
 
                                 <div className="text-xs text-[#99aabb] mt-auto">
